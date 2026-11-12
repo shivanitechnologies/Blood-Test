@@ -1,0 +1,3 @@
+(() => {
+  window.NovaAdmin = { demoOnly: true };
+})();

@@ -1,0 +1,1 @@
+.dash-section{display:none}.dash-section.active{display:block}.sidebar-backdrop{display:none}.sidebar-backdrop.active{display:block;position:fixed;z-index:40;inset:0;background:#0d243d80}.dash-top .icon-btn{display:none}.table-action{border:0;background:none;color:var(--teal);font-weight:700}.admin-edit{display:flex;gap:7px}

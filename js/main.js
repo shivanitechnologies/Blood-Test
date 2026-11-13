@@ -45,7 +45,7 @@
   const btn = (label, href, cls = "") => `<a class="btn ${cls}" href="${href}">${label}</a>`;
   const pageHero = (title, label, description) => `<section class="page-hero"><div class="container"><div class="breadcrumbs"><a href="index.html">Home</a> / ${label}</div><span class="eyebrow">${label}</span><h1>${title}</h1><p>${description}</p></div></section>`;
   const marquee = () => `<div class="marquee" aria-label="NOVALAB services"><div class="marquee-track"><span>THOUGHTFUL TESTING&nbsp; • &nbsp;HOME SAMPLE COLLECTION&nbsp; • &nbsp;DEMONSTRATION REPORTS&nbsp; • &nbsp;SAMPLE HEALTH PACKAGES&nbsp; • &nbsp;PATIENT-FIRST DIAGNOSTICS&nbsp; • &nbsp;</span><span aria-hidden="true">THOUGHTFUL TESTING&nbsp; • &nbsp;HOME SAMPLE COLLECTION&nbsp; • &nbsp;DEMONSTRATION REPORTS&nbsp; • &nbsp;SAMPLE HEALTH PACKAGES&nbsp; • &nbsp;PATIENT-FIRST DIAGNOSTICS&nbsp; • &nbsp;</span></div></div>`;
-  const header = () => `<div class="topbar"><div class="container topbar-inner"><span>Thoughtful diagnostics, closer to home</span><span>Questions? <a href="contact.html">Get in touch</a></span></div></div><header class="site-header"><div class="container nav-wrap">${brand}<nav class="nav-links" id="main-nav" aria-label="Main navigation"><a href="index.html" ${page === "home" ? 'class="active"' : ""}>Home</a><a href="home-premium.html">Home 2</a><a href="about.html">About</a><a href="services.html">Services</a><a href="tests.html">Tests & Packages</a><a href="home-collection.html">Home Collection</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="dashboard.html">Dashboard</a></nav><div class="nav-actions"><div class="theme-rtl"><button class="icon-btn" data-action="theme" aria-label="Toggle dark mode">◐</button><button class="icon-btn" data-action="rtl" aria-label="Switch text direction">⇄</button></div>${btn("Book a Test", "tests.html", "small")}${btn("Patient Login", "login.html", "outline small")}</div><button class="menu-toggle" data-action="menu" aria-label="Toggle navigation" aria-expanded="false">☰</button></div></header>`;
+  const header = () => `<div class="topbar"><div class="container topbar-inner"><span>Thoughtful diagnostics, closer to home</span><span>Questions? <a href="contact.html">Get in touch</a></span></div></div><header class="site-header"><div class="container nav-wrap">${brand}<nav class="nav-links" id="main-nav" aria-label="Main navigation"><a href="index.html" ${page === "home" ? 'class="active"' : ""}>Home</a><a href="home-premium.html">Home 2</a><a href="about.html">About</a><a href="services.html">Services</a><a href="tests.html">Tests & Packages</a><a href="home-collection.html">Home Collection</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="dashboard.html">Dashboard</a><span class="mobile-nav-actions">${btn("Book a Test", "tests.html", "small")}${btn("Patient Login", "login.html", "outline small")}</span></nav><div class="nav-actions"><div class="theme-rtl"><button class="icon-btn" data-action="theme" aria-label="Toggle dark mode">◐</button><button class="icon-btn" data-action="rtl" aria-label="Switch text direction">⇄</button></div>${btn("Book a Test", "tests.html", "small")}${btn("Patient Login", "login.html", "outline small")}</div><button class="menu-toggle" data-action="menu" aria-label="Toggle navigation" aria-expanded="false">☰</button></div></header>`;
   const footer = () => `<footer class="footer"><div class="container"><div class="footer-grid"><div>${brand}<p style="margin-top:18px">Better Testing. Better Understanding. Better Health.<br>Sample website content for demonstration only.</p></div><div><h3>Explore</h3><div class="footer-links"><a href="about.html">About us</a><a href="services.html">Our services</a><a href="tests.html">Tests & packages</a><a href="blog.html">Health insights</a></div></div><div><h3>Patient resources</h3><div class="footer-links"><a href="home-collection.html">Home collection</a><a href="report-download.html">Report access</a><a href="dashboard.html">Patient dashboard</a><a href="pricing.html">Pricing</a></div></div><div><h3>Get in touch</h3><div class="footer-links"><span>Address: Add verified laboratory address</span><a href="tel:+910000000000">Phone: +91 00000 00000</a><a href="mailto:hello@example.com">Email: hello@example.com</a><a href="contact.html">Contact team</a></div></div></div><div class="footer-bottom"><span>© 2026 NOVALAB Demo. All rights reserved.</span><span>Demonstration website — no real bookings, results or clinical services.</span></div></div></footer>`;
   const shell = content => `${header()}${content}${footer()}`;
   const sectionHead = (eyebrow, title, copy) => `<div class="section-head reveal"><span class="eyebrow">${eyebrow}</span><h2>${title}</h2><p>${copy}</p></div>`;
@@ -136,6 +136,23 @@
     "coming-soon": renderComingSoon
   };
   app.innerHTML = (renderMap[page] || renderMap["not-found"])();
+  if (page === "home" || page === "premium") {
+    app.querySelectorAll("img").forEach(image => {
+      if (!image.hasAttribute("loading")) image.loading = "lazy";
+      if (!image.hasAttribute("decoding")) image.decoding = "async";
+    });
+    const carousel = app.querySelector(".testimonial .carousel-controls");
+    if (carousel) {
+      carousel.setAttribute("role", "group");
+      carousel.setAttribute("aria-label", "Testimonial controls");
+      carousel.querySelectorAll("button").forEach(button => { button.type = "button"; });
+      const pauseButton = carousel.querySelector('[data-action="quote-pause"]');
+      if (pauseButton) {
+        pauseButton.textContent = "Pause";
+        pauseButton.setAttribute("aria-pressed", "false");
+      }
+    }
+  }
   app.querySelectorAll('[data-action="rtl"]').forEach(button => {
     if (button.closest(".dash-panel")) return;
     const control = document.createElement("span");
@@ -148,7 +165,25 @@
   if (page === "home" || page === "premium") {
     const categorySection = document.createElement("section");
     categorySection.className = "home-category-strip section soft";
-    categorySection.innerHTML = `<div class="container"><div class="section-head reveal"><span class="eyebrow">Explore diagnostics</span><h2>Tests for every health question</h2><p>Browse our sample diagnostic categories. Availability and preparation should be confirmed locally.</p></div><div class="test-track-wrap"><div class="test-track" data-test-track>${categories.concat(categories).map((name, i) => `<article class="test-chip" ${i >= categories.length ? 'aria-hidden="true" tabindex="-1"' : 'tabindex="0"'}><span class="card-icon">${["◉","⌁","◈","≈","⌂","◇","✳","＋"][i % categories.length]}</span><strong>${name}</strong><p>Explore this test category</p></article>`).join("")}</div></div><div class="slider-controls"><button data-action="slide-left" aria-label="Scroll tests left">←</button><button data-action="slide-right" aria-label="Scroll tests right">→</button></div></div>`;
+    const renderCategorySet = duplicate => `<div class="test-track-set" ${duplicate ? 'aria-hidden="true"' : ""}>${categories.map((name, index) => `<article class="test-chip reveal" tabindex="${duplicate ? "-1" : "0"}"><span class="card-icon">${["◉","⌁","◈","≈","⌂","◇","✳","＋"][index % categories.length]}</span><strong>${name}</strong><p>Explore this test category</p></article>`).join("")}</div>`;
+    categorySection.innerHTML = `
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Explore diagnostics</span>
+          <h2>Tests for every health question</h2>
+          <p>Browse our sample diagnostic categories. Availability and preparation should be confirmed locally.</p>
+        </div>
+        <div class="test-track-wrap">
+          <div class="test-track" data-test-track role="region" aria-label="Diagnostic test categories" aria-roledescription="carousel" tabindex="0">
+            ${renderCategorySet(false)}${renderCategorySet(true)}
+          </div>
+        </div>
+        <div class="slider-controls" role="group" aria-label="Test category slider controls">
+          <button type="button" data-slider-prev aria-label="Show previous test categories">←</button>
+          <button type="button" class="nova-motion-button" data-slider-toggle data-slider-name="test category" aria-pressed="false">Pause</button>
+          <button type="button" data-slider-next aria-label="Show next test categories">→</button>
+        </div>
+      </div>`;
     if (page === "premium") $(".premium-hero")?.nextElementSibling?.nextElementSibling?.remove();
     $(".stats")?.after(categorySection);
     const videoUrl = page === "home"
@@ -169,15 +204,7 @@
       video.poster = videoPoster;
       video.setAttribute("aria-hidden", "true");
       video.innerHTML = `<source src="${videoUrl}" type="video/mp4">`;
-      const toggle = document.createElement("button");
-      toggle.type = "button";
-      toggle.className = "video-toggle";
-      toggle.dataset.action = "video-toggle";
-      toggle.setAttribute("aria-label", "Pause background video");
-      toggle.setAttribute("aria-pressed", "false");
-      toggle.textContent = "Ⅱ";
       visual.prepend(video);
-      visual.append(toggle);
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) video.pause();
     }
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -210,6 +237,13 @@
         card.style.removeProperty("--tilt-y");
       });
     });
+    const homeEffectsStyle = document.createElement("link");
+    homeEffectsStyle.rel = "stylesheet";
+    homeEffectsStyle.href = "css/home-experience.css";
+    document.head.append(homeEffectsStyle);
+    const homeEffectsScript = document.createElement("script");
+    homeEffectsScript.src = "js/home-experience.js";
+    document.body.append(homeEffectsScript);
   }
   if (page === "admin") {
     const bookingRows = $$('[data-dash-panel="Bookings"] tbody tr');
@@ -257,17 +291,67 @@
     ["“It was helpful to find the test information and collection request in one place.”", "Sample patient · B."],
     ["“The sample dashboard made it easy to understand where a report might appear.”", "Sample patient · C."]
   ];
-  let quoteIndex = 0, quoteTimer, quotePaused = false;
+  const quoteMotionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let quoteIndex = 0, quoteTimer = 0, quoteVisible = false, quotePaused = false, quoteHovered = false, quoteFocused = false;
+  const quotePanel = $("[data-quote]")?.closest(".testimonial");
+  const quotePauseButton = quotePanel?.querySelector('[data-action="quote-pause"]');
+  const updateQuotePauseButton = () => {
+    if (!quotePauseButton) return;
+    const motionOff = quoteMotionPreference.matches;
+    quotePauseButton.disabled = motionOff;
+    quotePauseButton.textContent = motionOff ? "Motion off" : quotePaused ? "Resume" : "Pause";
+    quotePauseButton.setAttribute("aria-pressed", String(quotePaused));
+    quotePauseButton.setAttribute("aria-label", motionOff
+      ? "Automatic testimonial movement disabled by reduced motion preference"
+      : `${quotePaused ? "Resume" : "Pause"} automatic testimonials`);
+  };
+  const syncQuoteTimer = () => {
+    const shouldRotate = quoteVisible && !quotePaused && !quoteHovered && !quoteFocused
+      && !quoteMotionPreference.matches;
+    if (shouldRotate && !quoteTimer) quoteTimer = setInterval(() => rotateQuote(1), 5500);
+    if (!shouldRotate && quoteTimer) {
+      clearInterval(quoteTimer);
+      quoteTimer = 0;
+    }
+    updateQuotePauseButton();
+  };
   const showQuote = () => {
     const q = $("[data-quote]");
     if (!q) return;
     q.textContent = testimonials[quoteIndex][0];
     $("[data-quote-name]").textContent = testimonials[quoteIndex][1];
-    $("[data-quote-index]").textContent = `${quoteIndex + 1} / ${testimonials.length}`;
   };
   const rotateQuote = delta => { quoteIndex = (quoteIndex + delta + testimonials.length) % testimonials.length; showQuote(); };
-  const startQuotes = () => { if (!quoteTimer) quoteTimer = setInterval(() => { if (!quotePaused) rotateQuote(1); }, 5500); };
-  startQuotes();
+  if (quotePanel) {
+    quotePanel.addEventListener("pointerenter", () => { quoteHovered = true; syncQuoteTimer(); });
+    quotePanel.addEventListener("pointerleave", () => { quoteHovered = false; syncQuoteTimer(); });
+    quotePanel.addEventListener("focusin", () => { quoteFocused = true; syncQuoteTimer(); });
+    quotePanel.addEventListener("focusout", event => {
+      if (!quotePanel.contains(event.relatedTarget)) {
+        quoteFocused = false;
+        syncQuoteTimer();
+      }
+    });
+    if ("IntersectionObserver" in window) {
+      const quoteVisibility = new IntersectionObserver(entries => {
+        quoteVisible = entries[0].isIntersecting;
+        syncQuoteTimer();
+      }, { threshold: .2 });
+      quoteVisibility.observe(quotePanel);
+    } else {
+      quoteVisible = true;
+    }
+  }
+  document.addEventListener("visibilitychange", syncQuoteTimer);
+  quoteMotionPreference.addEventListener("change", syncQuoteTimer);
+  syncQuoteTimer();
+  const restartQuoteTimer = () => {
+    if (quoteTimer) {
+      clearInterval(quoteTimer);
+      quoteTimer = 0;
+    }
+    syncQuoteTimer();
+  };
   let blogCategory = "All", blogPage = 0;
   const filterBlogs = () => {
     const grid = $("[data-blog-grid]");
@@ -330,35 +414,20 @@
     switch (action) {
       case "theme": window.NovaTheme.toggle(); break;
       case "rtl": window.NovaTheme.direction(); break;
-      case "video-toggle": {
-        const video = target.closest(".hero-visual, .premium-visual")?.querySelector("video");
-        if (!video) break;
-        if (video.paused) {
-          video.play().then(() => {
-            target.textContent = "Ⅱ";
-            target.setAttribute("aria-label", "Pause background video");
-            target.setAttribute("aria-pressed", "false");
-          }).catch(() => window.NovaToast("Video playback is unavailable. The poster image remains visible."));
-        } else {
-          video.pause();
-          target.textContent = "▶";
-          target.setAttribute("aria-label", "Play background video");
-          target.setAttribute("aria-pressed", "true");
-        }
-        break;
-      }
       case "menu": {
         const nav = $("#main-nav"); const open = nav.classList.toggle("open"); target.setAttribute("aria-expanded", String(open)); target.textContent = open ? "×" : "☰"; break;
       }
       case "faq": {
         const item = target.closest(".faq"); item.classList.toggle("open"); target.setAttribute("aria-expanded", String(item.classList.contains("open"))); break;
       }
-      case "slide-left": $("[data-test-track]")?.scrollBy({ left: -300, behavior: "smooth" }); break;
-      case "slide-right": $("[data-test-track]")?.scrollBy({ left: 300, behavior: "smooth" }); break;
-      case "quote-prev": rotateQuote(-1); break;
-      case "quote-next": rotateQuote(1); break;
-      case "quote-pause": quotePaused = !quotePaused; target.textContent = quotePaused ? "▶" : "Ⅱ"; target.setAttribute("aria-label", quotePaused ? "Resume testimonials" : "Pause testimonials"); break;
       case "test-detail": showTestModal(Number(target.dataset.index)); break;
+      case "quote-prev": rotateQuote(-1); restartQuoteTimer(); break;
+      case "quote-next": rotateQuote(1); restartQuoteTimer(); break;
+      case "quote-pause":
+        quotePaused = !quotePaused;
+        if (!quotePaused) quoteFocused = false;
+        syncQuoteTimer();
+        break;
       case "modal-close": target.closest(".modal-backdrop").remove(); break;
       case "password": {
         const input = target.parentElement.querySelector("input"); input.type = input.type === "password" ? "text" : "password"; target.setAttribute("aria-label", input.type === "password" ? "Show password" : "Hide password"); break;

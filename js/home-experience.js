@@ -3,11 +3,16 @@
   if (page !== "home" && page !== "premium") return;
 
   const $ = (selector, root = document) => root.querySelector(selector);
-  const photo = (id, alt) => ({
-    src: `https://images.pexels.com/videos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1600&q=85`,
-    srcset: [480, 900, 1600].map(width => `https://images.pexels.com/videos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${width}&q=85 ${width}w`).join(", "),
-    alt
-  });
+  const photo = (id, alt, collection = "videos") => {
+    const path = collection === "photos"
+      ? `photos/${id}/pexels-photo-${id}.jpeg`
+      : `videos/${id}/pexels-photo-${id}.jpeg`;
+    return {
+      src: `https://images.pexels.com/${path}?auto=compress&cs=tinysrgb&w=1600&q=85`,
+      srcset: [480, 900, 1600].map(width => `https://images.pexels.com/${path}?auto=compress&cs=tinysrgb&w=${width}&q=85 ${width}w`).join(", "),
+      alt
+    };
+  };
   const photos = page === "home" ? [
     { ...photo("32810112", "Laboratory technician handling blood samples in a centrifuge"), label: "Sample processing" },
     { ...photo("6290527", "Blood sample tubes arranged for laboratory checking"), label: "Blood sample tubes" },
@@ -29,21 +34,16 @@
       ? "Explore the people, samples and equipment behind a thoughtful diagnostic experience."
       : "A real-world look at modern sample processing and laboratory technology.";
     const renderSet = duplicate => `<div class="nova-gallery-set" ${duplicate ? 'aria-hidden="true"' : ""}>${photos.map((item, index) => `
-      <figure class="nova-gallery-card reveal">
-        <img src="${item.src}" srcset="${item.srcset}" sizes="(max-width: 700px) 78vw, (max-width: 1200px) 29vw, 350px" alt="${duplicate ? "" : item.alt}" ${duplicate ? 'tabindex="-1"' : ""} loading="${!duplicate && index < 2 ? "eager" : "lazy"}" decoding="async">
+      <figure class="nova-gallery-card reveal" role="group" aria-roledescription="slide" aria-label="${index + 1} of ${photos.length}: ${item.label}">
+      <img src="${item.src}" srcset="${item.srcset}" sizes="(max-width: 700px) 78vw, (max-width: 1200px) 29vw, 350px" alt="${duplicate ? "" : item.alt}" loading="lazy" decoding="async">
         <figcaption>${item.label}</figcaption>
       </figure>`).join("")}</div>`;
     section.innerHTML = `
       <div class="container">
         <div class="nova-gallery-heading">
           <div><span class="eyebrow">${page === "home" ? "Inside NOVALAB" : "A modern laboratory"}</span><h2>${title}</h2><p>${copy}</p></div>
-          <div class="nova-gallery-controls" role="group" aria-label="Gallery controls">
-            <button type="button" class="icon-btn" data-slider-prev aria-label="Show previous laboratory images">←</button>
-            <button type="button" class="nova-motion-button" data-slider-toggle data-slider-name="laboratory gallery" aria-pressed="false">Pause</button>
-            <button type="button" class="icon-btn" data-slider-next aria-label="Show next laboratory images">→</button>
-          </div>
         </div>
-        <div class="nova-gallery-window" data-gallery-window role="region" aria-label="Laboratory image carousel" aria-roledescription="carousel" tabindex="0">
+        <div id="laboratory-gallery" class="nova-gallery-window" data-gallery-window role="region" aria-label="Laboratory image carousel" aria-roledescription="carousel">
           <div class="nova-gallery-track" data-gallery-track>${renderSet(false)}${renderSet(true)}</div>
         </div>
       </div>`;
@@ -79,8 +79,8 @@
 
   const equipment = document.createElement("section");
   const equipmentPhoto = page === "home"
-    ? photo("8381266", "Blood collection tubes being processed by laboratory equipment")
-    : photo("30775057", "Modern automated laboratory diagnostic equipment");
+    ? photo("8442029", "Blood sample tubes inside a laboratory centrifuge", "photos")
+    : photo("8442027", "Advanced diagnostic machinery inside a medical laboratory", "photos");
   equipment.className = "section soft nova-equipment-section";
   equipment.innerHTML = page === "home" ? `
     <div class="container grid-2">
@@ -104,11 +104,11 @@
     const team = document.createElement("section");
     team.className = "section soft nova-team-section";
     team.innerHTML = `<div class="container"><div class="section-head reveal"><span class="eyebrow">The people behind the process</span><h2>Skilled hands. Thoughtful work.</h2><p>Use verified staff photos and credentials before publishing a real laboratory team profile.</p></div><div class="nova-team-grid">${[
-      ["5453699", "Sample handling", "Laboratory technicians"],
-      ["6096734", "Instrument care", "Laboratory operations"],
-      ["8381327", "Testing workflow", "Diagnostic team"]
+      ["8442568", "Scientist using a microscope", "Laboratory technicians", "photos"],
+      ["9574556", "Scientist analyzing laboratory samples", "Laboratory operations", "photos"],
+      ["3735705", "Gloved hands examining a blood sample", "Diagnostic team", "photos"]
     ].map(member => {
-      const memberPhoto = photo(member[0], member[1]);
+      const memberPhoto = photo(member[0], member[1], member[3]);
       return `<article class="nova-team-card reveal"><img src="${memberPhoto.src}" srcset="${memberPhoto.srcset}" sizes="(max-width: 700px) 125px, 33vw" alt="${member[1]}" loading="lazy" decoding="async"><div><strong>${member[2]}</strong><span>Sample team role</span></div></article>`;
     }).join("")}</div></div>`;
     report.after(team);
@@ -119,7 +119,7 @@
   if (!windowEl || !track) return;
 
   if (window.NovaAnimations) {
-  window.NovaAnimations.bindAutoScroller({ track, viewport: windowEl, speed: 42 });
-  window.NovaAnimations.start();
+    window.NovaAnimations.bindAutoScroller({ track, viewport: windowEl, speed: 42 });
+    window.NovaAnimations.start();
   }
 })();

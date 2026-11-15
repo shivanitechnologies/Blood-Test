@@ -4,48 +4,31 @@
   let revealObserver;
   let countObserver;
 
-  const bindAutoScroller = ({ track, viewport, speed = 48, hoverTarget = viewport }) => {
+  const bindAutoScroller = ({ track, viewport, speed = 48, hoverTarget }) => {
     if (!track || !viewport || scrollers.has(track)) return;
+    viewport.dir = "ltr";
 
     const controlsRoot = track.closest(".home-category-strip, .nova-gallery-section") || track.parentElement;
-    const toggleButton = controlsRoot.querySelector("[data-slider-toggle]");
-    const previousButton = controlsRoot.querySelector("[data-slider-prev]");
-    const nextButton = controlsRoot.querySelector("[data-slider-next]");
+    if (!controlsRoot) return;
+    const pauseTarget = hoverTarget || controlsRoot;
     const state = {
-      manuallyPaused: false,
       hovered: false,
       focused: false,
-      interacting: false,
       visible: false,
       frame: 0,
-      lastFrameTime: 0,
-      resumeTimer: 0
+      lastFrameTime: 0
     };
 
     const canRun = () => !motionPreference.matches
       && state.visible
-      && !state.manuallyPaused
       && !state.hovered
       && !state.focused
-      && !state.interacting
       && document.visibilityState === "visible";
 
     const stop = () => {
       if (state.frame) cancelAnimationFrame(state.frame);
       state.frame = 0;
       state.lastFrameTime = 0;
-    };
-
-    const updateButton = () => {
-      if (!toggleButton) return;
-      toggleButton.disabled = motionPreference.matches;
-      toggleButton.textContent = motionPreference.matches
-        ? "Motion off"
-        : state.manuallyPaused ? "Resume" : "Pause";
-      toggleButton.setAttribute("aria-pressed", String(state.manuallyPaused));
-      toggleButton.setAttribute("aria-label", motionPreference.matches
-        ? "Automatic movement disabled by reduced motion preference"
-        : `${state.manuallyPaused ? "Resume" : "Pause"} automatic ${toggleButton.dataset.sliderName || "image"} movement`);
     };
 
     const tick = now => {
@@ -66,7 +49,6 @@
     };
 
     const update = () => {
-      updateButton();
       if (canRun()) {
         if (!state.frame) state.frame = requestAnimationFrame(tick);
       } else {
@@ -74,50 +56,14 @@
       }
     };
 
-    const resumeAfterInteraction = () => {
-      state.interacting = true;
-      clearTimeout(state.resumeTimer);
-      state.resumeTimer = window.setTimeout(() => {
-        state.interacting = false;
-        state.resumeTimer = 0;
-        update();
-      }, 1800);
-      update();
-    };
-
-    const moveByCard = direction => {
-      const card = track.querySelector(".nova-gallery-card, .test-chip");
-      const step = Math.max(card?.getBoundingClientRect().width || 0, viewport.clientWidth * .8);
-      viewport.scrollBy({ left: direction * step, behavior: motionPreference.matches ? "auto" : "smooth" });
-      resumeAfterInteraction();
-    };
-
-    toggleButton?.addEventListener("click", () => {
-      state.manuallyPaused = !state.manuallyPaused;
-      update();
-    });
-    previousButton?.addEventListener("click", () => moveByCard(-1));
-    nextButton?.addEventListener("click", () => moveByCard(1));
-    hoverTarget.addEventListener("pointerenter", () => { state.hovered = true; update(); });
-    hoverTarget.addEventListener("pointerleave", () => { state.hovered = false; update(); });
-    viewport.addEventListener("focusin", () => { state.focused = true; update(); });
-    viewport.addEventListener("focusout", event => {
-      if (!viewport.contains(event.relatedTarget)) {
+    pauseTarget.addEventListener("pointerenter", () => { state.hovered = true; update(); });
+    pauseTarget.addEventListener("pointerleave", () => { state.hovered = false; update(); });
+    controlsRoot.addEventListener("focusin", () => { state.focused = true; update(); });
+    controlsRoot.addEventListener("focusout", event => {
+      if (!controlsRoot.contains(event.relatedTarget)) {
         state.focused = false;
         update();
       }
-    });
-    viewport.addEventListener("wheel", resumeAfterInteraction, { passive: true });
-    viewport.addEventListener("pointerdown", () => {
-      state.interacting = true;
-      update();
-      window.addEventListener("pointerup", resumeAfterInteraction, { once: true });
-      window.addEventListener("pointercancel", resumeAfterInteraction, { once: true });
-    });
-    viewport.addEventListener("keydown", event => {
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-      event.preventDefault();
-      moveByCard(event.key === "ArrowRight" ? 1 : -1);
     });
     document.addEventListener("visibilitychange", update);
     motionPreference.addEventListener("change", update);

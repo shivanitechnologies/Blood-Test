@@ -192,7 +192,7 @@
       ? "https://videos.pexels.com/video-files/13532394/13532394-hd_1920_1080_60fps.mp4"
       : "https://videos.pexels.com/video-files/8381327/8381327-hd_1920_1080_25fps.mp4";
     const videoPoster = page === "home"
-      ? "https://images.pexels.com/videos/13532394/pexels-photo-13532394.jpeg?auto=compress&cs=tinysrgb&w=1200"
+      ? "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=85"
       : "https://images.pexels.com/videos/8381327/pexels-photo-8381327.jpeg?auto=compress&cs=tinysrgb&w=1200";
     const visual = page === "home" ? $(".hero-visual") : $(".premium-visual");
     if (visual) {
